@@ -1,0 +1,25 @@
+#!/usr/bin/bash
+
+as_root() {
+    local wrapper="/usr/local/sbin/rofi-mullvad-wrapper.sh"
+    # Validate wrapper exists
+    if [[ ! -f "$wrapper" ]]; then
+        echo "Error: VPN wrapper not found or not executable: $wrapper" >&2
+        return 1
+    fi
+
+    # Check ownership (slightly more expensive but still fast)
+    local owner
+    owner=$(stat -c "%U" "$wrapper" 2>/dev/null)
+    if [[ "$owner" != "root" ]]; then
+        echo "Error: VPN wrapper not owned by root: $wrapper" >&2
+        return 1
+    fi
+    
+    # Execute with all arguments passed through
+    sudo "$wrapper" "$@"
+}
+
+conf=$(as_root wg-list | rofi -dmenu)
+
+as_root wg-up conf
