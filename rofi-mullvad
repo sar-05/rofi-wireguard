@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+set -euo pipefail
 
 as_root() {
     local wrapper="/usr/local/sbin/rofi-mullvad-wrapper.sh"
@@ -24,11 +25,16 @@ as_root() {
 conf_files=$(as_root wg-list | sed 's/\.conf$//')
 
 #Check if there's an active connection
-current_conf=$(as_root wg-show | grep interface | awk '{print $2}')
+connection=$(as_root wg-show)
+if [[ -n "$connection" ]]; then
+  active_connection=$( echo "$connection" | grep "interface" | awk '{print $2}')
+else
+  active_connection=""
+fi
 
 # Get selection
-if [[ -n $current_conf ]]; then
-  line_num=$(echo "$conf_files" | grep -n "^${current_conf}$" | cut -d: -f1)
+if [[ -n $active_connection ]]; then
+  line_num=$(echo "$conf_files" | grep -n "^${active_connection}$" | cut -d: -f1)
   if [[ -n "$line_num" ]]; then
     index=$((line_num - 1))
     selection=$(echo "$conf_files" | rofi -dmenu -u "$index")
@@ -47,12 +53,12 @@ if [[ -z "$selection" ]]; then
 fi
 
 # Execute VPN commands
-if [[ -z "$current_conf" ]]; then
+if [[ -z "$active_connection" ]]; then
   as_root wg-up "$selection"
-elif [[ "$current_conf" = "$selection" ]]; then
-  as_root wg-down "$current_conf"
+elif [[ "$active_connection" = "$selection" ]]; then
+  as_root wg-down "$active_connection"
 elif grep -q "$selection" <<< "$conf_files"; then
-  as_root wg-down "$current_conf"
+  as_root wg-down "$active_connection"
   as_root wg-up "$selection"
 else
   echo "Error: Invalid WireGuard file name"

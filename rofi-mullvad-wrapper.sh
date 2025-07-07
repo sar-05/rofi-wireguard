@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 # /usr/local/sbin/rofi-mullvad-wrapper.sh
 # Simple, secure wrapper for WireGuard operations
 #
