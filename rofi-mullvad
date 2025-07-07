@@ -2,23 +2,23 @@
 set -euo pipefail
 
 as_root() {
-    local wrapper="/usr/local/sbin/rofi-mullvad-wrapper.sh"
-    # Validate wrapper exists
-    if [[ ! -f "$wrapper" ]]; then
-        echo "Error: VPN wrapper not found or not executable: $wrapper" >&2
-        return 1
-    fi
+  local wrapper="/usr/local/sbin/rofi-mullvad-wrapper.sh"
+  # Validate wrapper exists
+  if [[ ! -f "$wrapper" ]]; then
+    echo "Error: VPN wrapper not found or not executable: $wrapper" >&2
+    return 1
+  fi
 
-    # Check ownership
-    local owner
-    owner=$(stat -c "%U" "$wrapper" 2>/dev/null)
-    if [[ "$owner" != "root" ]]; then
-        echo "Error: VPN wrapper not owned by root: $wrapper" >&2
-        return 1
-    fi
-    
-    # Execute with all arguments passed through
-    sudo "$wrapper" "$@"
+  # Check ownership
+  local owner
+  owner=$(stat -c "%U" "$wrapper" 2>/dev/null)
+  if [[ "$owner" != "root" ]]; then
+    echo "Error: VPN wrapper not owned by root: $wrapper" >&2
+    return 1
+  fi
+  
+  # Execute with all arguments passed through
+  sudo "$wrapper" "$@"
 }
 
 #Get config files in /etc/wireguard/
@@ -48,8 +48,8 @@ fi
 
 # Check if user actually selected something
 if [[ -z "$selection" ]]; then
-    echo "No selection made, exiting." >&2
-    exit 0
+  echo "No selection made, exiting." >&2
+  exit 0
 fi
 
 # Execute VPN commands
