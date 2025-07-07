@@ -48,8 +48,13 @@ fi
 
 # Execute VPN commands
 if [[ -z "$current_conf" ]]; then
-  as_root wg-up $selection
-else
+  as_root wg-up "$selection"
+elif [[ "$current_conf" = "$selection" ]]; then
+  as_root wg-down "$current_conf"
+elif grep -q "$selection" <<< "$conf_files"; then
   as_root wg-down "$current_conf"
   as_root wg-up "$selection"
+else
+  echo "Error: Invalid WireGuard file name"
+  exit 1
 fi
