@@ -28,6 +28,7 @@ is_valid_interface() {
     [[ "$interface" =~ ^[a-zA-Z0-9_.-]{1,15}$ ]]
 }
 
+# Validation functions
 is_valid_conf() {
     local conf="$1"
     # Simple check: alphanumeric, underscore, hyphen, dot, 1-15 chars
@@ -46,12 +47,13 @@ is_valid_cidr() {
     [[ "$cidr" =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$ ]]
 }
 
+# Main command dispatcher
 case "$1" in
     "wg-up")
         # Expected: wg-up <conf>
         conf="$2"
         if ! is_valid_conf "$conf"; then
-            echo "Error: Invalid WireGuard configuration file name" >&2
+            echo "Error: Invalid WireGuard file name" >&2
             exit 1
         fi
         if [[ ! -f "/etc/wireguard/${conf}.conf" ]]; then
@@ -62,10 +64,9 @@ case "$1" in
         ;;
         
     "wg-down")
-        # Expected: wg-conf <conf>
         conf="$2"
         if ! is_valid_conf "$conf"; then
-            echo "Error: Invalid WireGuard configuration file name" >&2
+            echo "Error: Invalid WireGuard file name" >&2
             exit 1
         fi
         exec "$WG_QUICK" down "$conf"
@@ -76,7 +77,7 @@ case "$1" in
         ;;
         
     "wg-list")
-        exec ls "$WG_DIR"
+    exec ls "$WG_DIR" | grep ".conf"
         ;;
         
     "route-add")
@@ -125,12 +126,6 @@ case "$1" in
         
     *)
         echo "Usage: $0 {wg-up|wg-down|wg-show|route-add|route-del} [args...]" >&2
-        echo ""
-        echo "Examples:"
-        echo "  $0 wg-up wg0"
-        echo "  $0 wg-show"
-        echo "  $0 route-add 192.168.1.0/24 10.0.0.1 wg0"
-        echo "  $0 route-del 192.168.1.0/24 10.0.0.1 wg0"
         exit 1
         ;;
 esac

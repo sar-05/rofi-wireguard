@@ -8,7 +8,7 @@ as_root() {
         return 1
     fi
 
-    # Check ownership (slightly more expensive but still fast)
+    # Check ownership
     local owner
     owner=$(stat -c "%U" "$wrapper" 2>/dev/null)
     if [[ "$owner" != "root" ]]; then
@@ -20,6 +20,36 @@ as_root() {
     sudo "$wrapper" "$@"
 }
 
-conf=$(as_root wg-list | rofi -dmenu)
+#Get config files in /etc/wireguard/
+conf_files=$(as_root wg-list | sed 's/\.conf$//')
 
-as_root wg-up conf
+#Check if there's an active connection
+current_conf=$(as_root wg-show | grep interface | awk '{print $2}')
+
+# Get selection
+if [[ -n $current_conf ]]; then
+  line_num=$(echo "$conf_files" | grep -n "^${current_conf}$" | cut -d: -f1)
+  if [[ -n "$line_num" ]]; then
+    index=$((line_num - 1))
+    selection=$(echo "$conf_files" | rofi -dmenu -u "$index")
+  else
+    # Current conf not found in list, show without highlighting
+    selection=$(echo "$conf_files" | rofi -dmenu)
+  fi
+else
+  selection=$(echo "$conf_files" | rofi -dmenu)
+fi
+
+# Check if user actually selected something
+if [[ -z "$selection" ]]; then
+    echo "No selection made, exiting." >&2
+    exit 0
+fi
+
+# Execute VPN commands
+if [[ -z "$current_conf" ]]; then
+  as_root wg-up $selection
+else
+  as_root wg-down "$current_conf"
+  as_root wg-up "$selection"
+fi
