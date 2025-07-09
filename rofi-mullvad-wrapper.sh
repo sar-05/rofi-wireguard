@@ -1,22 +1,12 @@
 #!/bin/bash
 set -euo pipefail
-# /usr/local/sbin/rofi-mullvad-wrapper.sh
-# Simple, secure wrapper for WireGuard operations
-#
-# Installation:
-#   sudo cp rofi-mullvad-wrapper.sh /usr/local/sbin/
-#   sudo chown root:root /usr/local/sbin/rofi-mullvad-wrapper.sh
-#   sudo chmod 700 /usr/local/sbin/rofi-mullvad-wrapper.sh
-#
-# Sudoers entry (/etc/sudoers.d/rofi-mullvad-wrapper):
-#   username ALL=(ALL) NOPASSWD: /usr/local/sbin/rofi-mullvad-wrapper.sh
 
-# Security: Sanitize environment
+# Sanitize environment
 PATH="/sbin:/usr/sbin:/bin:/usr/bin"
 IFS=$' \t\n'
 export PATH IFS
 
-# Absolute paths only
+# Absolute paths
 readonly WG="/usr/bin/wg"
 readonly WG_QUICK="/usr/bin/wg-quick"
 readonly IP="/sbin/ip"
