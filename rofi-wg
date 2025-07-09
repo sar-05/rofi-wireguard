@@ -21,6 +21,17 @@ as_root() {
   sudo "$wrapper" "$@"
 }
 
+add_route(){
+  local JSON_PATH="${XDG_CONFIG_HOME:-$USER/.config}/wg-up/routes.json"
+  #Check if routes.json exists and contains the conf in $1
+  if [[ -f "$JSON_PATH" ]] && grep -qw "$1" "$JSON_PATH"; then
+    network=$(jq ".$1.network" "$JSON_PATH")
+    gateway=$(jq ".$1.gateway" "$JSON_PATH")
+    interface=$(jq ".$1.interface" "$JSON_PATH")
+    as_root route-add "$network" "$gateway" "$interface"
+  fi
+}
+
 #Get config files in /etc/wireguard/
 conf_files=$(as_root wg-list | sed 's/\.conf$//')
 
