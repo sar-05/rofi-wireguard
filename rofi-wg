@@ -92,7 +92,7 @@ if [[ -z "$active_connection" ]]; then
 elif [[ "$active_connection" = "$selection" ]]; then
   as_root wg-down "$active_connection" && change_route "-d" "$selection"
 elif echo "$conf_files" | grep -q "$selection"; then
-  as_root wg-down "$active_connection" && change_route "-d" "$selection"
+  as_root wg-down "$active_connection" && change_route "-d" "$active_connection"
   as_root wg-up "$selection" && change_route "-a" "$selection"
 else
   echo "Error: Invalid WireGuard file name"
