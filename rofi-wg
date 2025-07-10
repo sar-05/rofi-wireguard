@@ -2,7 +2,7 @@
 set -euo pipefail
 
 as_root() {
-  local wrapper="/usr/local/sbin/rofi-mullvad-wrapper.sh"
+  local wrapper="/usr/local/sbin/rofi-wg-wrapper.sh"
   # Validate wrapper exists
   if [[ ! -f "$wrapper" ]]; then
     echo "Error: VPN wrapper not found or not executable: $wrapper" >&2

@@ -28,9 +28,9 @@ sudo -u "$ACTUAL_USER" cp ./rofi-wg "$ACTUAL_HOME/.local/bin/"
 sudo -u "$ACTUAL_USER" chmod +x "$ACTUAL_HOME/.local/bin/rofi-wg"
 
 # Copy wrapper and give appropriate permissions
-cp ./rofi-wg-wrapper /usr/local/sbin/
-chown root:root /usr/local/sbin/rofi-wg-wrapper
-chmod 700 /usr/local/sbin/rofi-wg-wrapper
+cp ./rofi-wg-wrapper.sh /usr/local/sbin/
+chown root:root /usr/local/sbin/rofi-wg-wrapper.sh
+chmod 700 /usr/local/sbin/rofi-wg-wrapper.sh
 
 # Create sudoers.d directory with proper permissions
 if [[ ! -d /etc/sudoers.d/ ]]; then
@@ -38,7 +38,7 @@ if [[ ! -d /etc/sudoers.d/ ]]; then
     chown root:root /etc/sudoers.d/
     chmod 750 /etc/sudoers.d/
 fi
-echo "$ACTUAL_USER ALL=(ALL) NOPASSWD: /usr/local/sbin/rofi-wg-wrapper" > /etc/sudoers.d/rofi-wg
+echo "$ACTUAL_USER ALL=(ALL) NOPASSWD: /usr/local/sbin/rofi-wg-wrapper.sh" > /etc/sudoers.d/rofi-wg
 
 # Set proper permissions on sudoers file
 chmod 440 /etc/sudoers.d/rofi-wg
