@@ -25,23 +25,27 @@ as_root() {
 
 change_route(){
   #Check if routes.json exists and contains the conf in $1
+  echo 'DEBUG: change_route function is being called'
   if [[ ! -f "$JSON_PATH" ]]; then
     echo "No $JSON_PATH has been defined"
     exit 0
   fi
+  echo 'DEBUG: JSON file was found'
 
   local selection="$2"
   local flag="$1"
 
+  # Defined net vars
   local network=""
   local gateway=""
-  local interface=""# Defined net vars
+  local interface=""
 
   if grep -qw "$selection" "$JSON_PATH"; then
     network=$(jq -r --arg key "$selection" '.[$key].network' "$JSON_PATH")
     gateway=$(jq -r --arg key "$selection" '.[$key].gateway' "$JSON_PATH")
     interface=$(jq -r --arg key "$selection" '.[$key].interface' "$JSON_PATH")
-    echo "DEBUG: Defined net vars"
+  else 
+    echo "DEBUG: $selection wasn't found by grep in $JSON_PATH"
   fi
 
   if [[ -n "$network" && -n "$gateway" && -n "$interface" ]]; then
