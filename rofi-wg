@@ -41,8 +41,9 @@ change_route(){
   local interface=""
 
   echo 'DEBUG: Network vars have been assigned empty values'
-  
-  if grep -qw "$selecion" "$JSON_PATH"; then
+  echo "Value of selection is $selection"
+
+  if grep -qw "$selection" "$JSON_PATH"; then
     network=$(jq -r --arg key "$selection" '.[$key].network' "$JSON_PATH")
     gateway=$(jq -r --arg key "$selection" '.[$key].gateway' "$JSON_PATH")
     interface=$(jq -r --arg key "$selection" '.[$key].interface' "$JSON_PATH")
