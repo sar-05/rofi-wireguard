@@ -1,6 +1,8 @@
 #!/usr/bin/bash
 set -euo pipefail
 
+JSON_PATH="${XDG_CONFIG_HOME:-$HOME/.config}/rofi-wg/routes.json"
+
 as_root() {
   local wrapper="/usr/local/sbin/rofi-mullvad-wrapper.sh"
   # Validate wrapper exists
@@ -21,14 +23,35 @@ as_root() {
   sudo "$wrapper" "$@"
 }
 
-add_route(){
-  local JSON_PATH="${XDG_CONFIG_HOME:-$USER/.config}/wg-up/routes.json"
+change_route(){
   #Check if routes.json exists and contains the conf in $1
-  if [[ -f "$JSON_PATH" ]] && grep -qw "$1" "$JSON_PATH"; then
-    network=$(jq ".$1.network" "$JSON_PATH")
-    gateway=$(jq ".$1.gateway" "$JSON_PATH")
-    interface=$(jq ".$1.interface" "$JSON_PATH")
-    as_root route-add "$network" "$gateway" "$interface"
+  if [[ ! -f "$JSON_PATH" ]]; then
+    echo "No $JSON_PATH has been defined"
+    exit 0
+  fi
+
+  local selecion="$2"
+  local flag="$1"
+
+  # Defined net vars
+  if grep -qw "$selecion" "$JSON_PATH"; then
+    local network=$(jq ".\"$selecion\".network" "$JSON_PATH" | sed 's/"//g')
+    local gateway=$(jq ".\"$selecion\".gateway" "$JSON_PATH" | sed 's/"//g')
+    local interface=$(jq ".\"$selecion\".interface" "$JSON_PATH" | sed 's/"//g')
+    echo "DEBUG: Defined net vars"
+  fi
+
+  if [[ -n "$network" && -n "$gateway" && -n "$interface" ]]; then
+    if [[ "$flag" = '-a' ]]; then
+      as_root route-add "$network" "$gateway" "$interface"
+      echo "DEBUG: Route added"
+    elif [[ "$flag" = '-d' ]] && ip route show | grep -qw "$network via $gateway dev $interface"; then
+      echo "DEBUG: Trying to remove route"
+      as_root route-del "$network" "$gateway" "$interface"
+      echo "DEBUG: Route removed"
+    else
+      echo "Error: unable to modify static route"
+    fi
   fi
 }
 
@@ -65,12 +88,12 @@ fi
 
 # Execute VPN commands
 if [[ -z "$active_connection" ]]; then
-  as_root wg-up "$selection"
+  as_root wg-up "$selection" && change_route "-a" "$selection"
 elif [[ "$active_connection" = "$selection" ]]; then
-  as_root wg-down "$active_connection"
-elif grep -q "$selection" <<< "$conf_files"; then
-  as_root wg-down "$active_connection"
-  as_root wg-up "$selection"
+  as_root wg-down "$active_connection" && change_route "-d" "$selection"
+elif echo "$conf_files" | grep -q "$selection"; then
+  as_root wg-down "$active_connection" && change_route "-d" "$selection"
+  as_root wg-up "$selection" && change_route "-a" "$selection"
 else
   echo "Error: Invalid WireGuard file name"
   exit 1
