@@ -30,14 +30,14 @@ change_route(){
     exit 0
   fi
 
-  local selecion="$2"
+  local selection="$2"
   local flag="$1"
 
   # Defined net vars
-  if grep -qw "$selecion" "$JSON_PATH"; then
-    local network=$(jq ".\"$selecion\".network" "$JSON_PATH" | sed 's/"//g')
-    local gateway=$(jq ".\"$selecion\".gateway" "$JSON_PATH" | sed 's/"//g')
-    local interface=$(jq ".\"$selecion\".interface" "$JSON_PATH" | sed 's/"//g')
+  if grep -qw "$selection" "$JSON_PATH"; then
+    local network=$(jq -r --arg key "$selection" '.[$key].network' "$JSON_PATH")
+    local gateway=$(jq -r --arg key "$selection" '.[$key].gateway' "$JSON_PATH")
+    local interface=$(jq -r --arg key "$selection" '.[$key].interface' "$JSON_PATH")
     echo "DEBUG: Defined net vars"
   fi
 
