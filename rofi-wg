@@ -57,7 +57,7 @@ if [[ -z "$active_connection" ]]; then
   as_root wg-up "$selection"
 elif [[ "$active_connection" = "$selection" ]]; then
   as_root wg-down "$active_connection"
-elif grep -q "$selection" <<< "$conf_files"; then
+elif echo "$conf_files" | grep -q "$selection"; then
   as_root wg-down "$active_connection"
   as_root wg-up "$selection"
 else
